@@ -1,15 +1,7 @@
 {
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
-}
-{
   "redirects": [
     {
-      "source": "/",
+      "source": "/(.*)",
       "destination": "https://www.messenger.com/t/zaldybernabe",
       "permanent": true
     }
