@@ -3,34 +3,168 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redirecting...</title>
-    <script>
-        // Try to open the Messenger app link
-        var messengerLink = "https://m.me/cm/AbbM8wDd01JOgyWZ/?send_source=cm:copy_invite_link";
-        var appLink = "fb-messenger://t/AbbM8wDd01JOgyWZ";
-        
-        // Attempt to open app on mobile
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            // Try app link first
-            window.location.href = appLink;
-            
-            // Fallback to web link after 1.5 seconds if app didn't open
-            setTimeout(function() {
-                window.location.href = messengerLink;
-            }, 1500);
-        } else {
-            // Desktop - go directly to web link
-            window.location.href = messengerLink;
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Opening Messenger...</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
         }
-    </script>
-    <meta http-equiv="refresh" content="2; url=https://m.me/cm/AbbM8wDd01JOgyWZ/?send_source=cm:copy_invite_link">
-    <link rel="canonical" href="https://m.me/cm/AbbM8wDd01JOgyWZ/?send_source=cm:copy_invite_link">
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 0 0 20px 0;
+        }
+        .spinner {
+            margin: 30px 0;
+        }
+        .spinner svg {
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        p {
+            font-size: 14px;
+            margin: 15px 0;
+            opacity: 0.9;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #fff;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        a:active {
+            transform: scale(0.98);
+        }
+        .error {
+            display: none;
+            background: rgba(255, 107, 107, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
-    <p style="text-align: center; margin-top: 50px; font-family: Arial;">
-        Redirecting to Messenger...
-        <br><br>
-        If you are not redirected automatically, <a href="https://m.me/cm/AbbM8wDd01JOgyWZ/?send_source=cm:copy_invite_link">click here</a>.
-    </p>
+    <div class="container">
+        <h1>Opening Messenger...</h1>
+        <div class="spinner">
+            <svg viewBox="0 0 50 50">
+                <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></circle>
+            </svg>
+        </div>
+        <p id="status">Redirecting to your community...</p>
+        <div class="error" id="error"></div>
+        <a href="https://m.me/cm/AbbM8wDd01JOgyWZ/?send_source=cm:copy_invite_link" id="fallbackLink">
+            Open in Messenger
+        </a>
+    </div>
+
+    <script>
+        const messengerLink = "https://m.me/cm/AbbM8wDd01JOgyWZ/?send_source=cm:copy_invite_link";
+        const statusEl = document.getElementById('status');
+        const errorEl = document.getElementById('error');
+        const fallbackLink = document.getElementById('fallbackLink');
+        
+        let redirectAttempted = false;
+
+        function attemptRedirect() {
+            try {
+                // Check if we're on a mobile device
+                const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                
+                if (isMobile) {
+                    statusEl.textContent = 'Attempting to open Messenger app...';
+                    
+                    // Try app protocol (may not work on Safari, but worth trying)
+                    const appScheme = "fb-messenger://t/AbbM8wDd01JOgyWZ";
+                    window.location.href = appScheme;
+                    redirectAttempted = true;
+                    
+                    // Fallback after 2.5 seconds (longer timeout for Safari)
+                    setTimeout(function() {
+                        if (document.hidden === false) {
+                            statusEl.textContent = 'Opening web version...';
+                            window.location.href = messengerLink;
+                        }
+                    }, 2500);
+                } else {
+                    // Desktop: go directly to web link
+                    statusEl.textContent = 'Opening Messenger in browser...';
+                    window.location.href = messengerLink;
+                    redirectAttempted = true;
+                }
+            } catch (e) {
+                console.error('Redirect error:', e);
+                showError();
+            }
+        }
+
+        function showError() {
+            errorEl.style.display = 'block';
+            errorEl.textContent = 'If redirect doesn\'t work, tap the button below:';
+            statusEl.textContent = 'Having trouble redirecting?';
+            fallbackLink.style.display = 'inline-block';
+        }
+
+        // Handle page visibility change (detects if user left the page or app opened)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // App or another tab opened
+                statusEl.textContent = 'Messenger is opening...';
+            }
+        });
+
+        // Start redirect immediately
+        window.addEventListener('load', function() {
+            attemptRedirect();
+        });
+
+        // Also try immediately in case load event fires too late
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attemptRedirect);
+        } else {
+            attemptRedirect();
+        }
+
+        // Additional fallback after 5 seconds if nothing happened
+        setTimeout(function() {
+            if (!redirectAttempted) {
+                statusEl.textContent = 'Try clicking the button below:';
+                fallbackLink.style.display = 'inline-block';
+            }
+        }, 5000);
+
+        // Enable fallback link
+        fallbackLink.onclick = function(e) {
+            e.preventDefault();
+            window.location.href = messengerLink;
+            return false;
+        };
+    </script>
 </body>
 </html>
