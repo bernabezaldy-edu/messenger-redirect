@@ -77,15 +77,16 @@
                 <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></circle>
             </svg>
         </div>
-        <p id="status">Redirecting to your community...</p>
+        <p id="status">Connecting to your community...</p>
         <div class="error" id="error"></div>
-        <a href="https://m.me/cm/AbbM8wDd01JOgyWZ/?send_source=cm:copy_invite_link" id="fallbackLink">
+        <a href="https://www.messenger.com/t/AbbM8wDd01JOgyWZ" id="fallbackLink">
             Open in Messenger
         </a>
     </div>
 
     <script>
-        const messengerLink = "https://m.me/cm/AbbM8wDd01JOgyWZ/?send_source=cm:copy_invite_link";
+        // Direct Messenger community link (most reliable)
+        const messengerLink = "https://www.messenger.com/t/AbbM8wDd01JOgyWZ";
         const statusEl = document.getElementById('status');
         const errorEl = document.getElementById('error');
         const fallbackLink = document.getElementById('fallbackLink');
@@ -98,23 +99,23 @@
                 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                 
                 if (isMobile) {
-                    statusEl.textContent = 'Attempting to open Messenger app...';
+                    statusEl.textContent = 'Messenger is opening...';
                     
-                    // Try app protocol (may not work on Safari, but worth trying)
+                    // Try app protocol first
                     const appScheme = "fb-messenger://t/AbbM8wDd01JOgyWZ";
                     window.location.href = appScheme;
                     redirectAttempted = true;
                     
-                    // Fallback after 2.5 seconds (longer timeout for Safari)
+                    // Fallback to web after 2 seconds
                     setTimeout(function() {
                         if (document.hidden === false) {
                             statusEl.textContent = 'Opening web version...';
                             window.location.href = messengerLink;
                         }
-                    }, 2500);
+                    }, 2000);
                 } else {
                     // Desktop: go directly to web link
-                    statusEl.textContent = 'Opening Messenger in browser...';
+                    statusEl.textContent = 'Opening Messenger community...';
                     window.location.href = messengerLink;
                     redirectAttempted = true;
                 }
@@ -131,33 +132,24 @@
             fallbackLink.style.display = 'inline-block';
         }
 
-        // Handle page visibility change (detects if user left the page or app opened)
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                // App or another tab opened
-                statusEl.textContent = 'Messenger is opening...';
-            }
-        });
-
-        // Start redirect immediately
+        // Start redirect
         window.addEventListener('load', function() {
             attemptRedirect();
         });
 
-        // Also try immediately in case load event fires too late
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', attemptRedirect);
         } else {
             attemptRedirect();
         }
 
-        // Additional fallback after 5 seconds if nothing happened
+        // Fallback after 4 seconds
         setTimeout(function() {
             if (!redirectAttempted) {
                 statusEl.textContent = 'Try clicking the button below:';
                 fallbackLink.style.display = 'inline-block';
             }
-        }, 5000);
+        }, 4000);
 
         // Enable fallback link
         fallbackLink.onclick = function(e) {
