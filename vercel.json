@@ -1,4 +1,9 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://www.messenger.com/cm/AbbM8wDd01JOgyWZ/?send_source=cm%3Acopy_invite_link",
+      "permanent": false
+    }
+  ]
 }
